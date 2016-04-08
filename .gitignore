@@ -1,0 +1,8 @@
+01-Assign-MR/resources/
+01-Assign-MR/bin/
+01-Assign-MR/build/
+.metadata/*
+.metadata/
+.metadata
+*.class
+

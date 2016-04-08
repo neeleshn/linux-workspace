@@ -1,0 +1,429 @@
+## Author: Habiba Neelesh
+#!/bin/bash
+echo "Running Script!"
+
+#Sequential programs
+cd src/sequential/
+javac SequentialAnalyser.java
+
+###Input 1
+####Mean
+_utime="$( TIMEFORMAT='%R';time ( java SequentialAnalyser ../../input/input1/ 0 > ../../output/seq_mean_input1.txt) 2>&1 1>/dev/null )"
+echo sequential,input1,mean,$_utime > ../../runtimes.csv
+
+####Median
+_utime="$( TIMEFORMAT='%R';time ( java SequentialAnalyser ../../input/input1/ 1 > ../../output/seq_median_input1.txt) 2>&1 1>/dev/null )"
+echo sequential,input1,median,$_utime >> ../../runtimes.csv
+
+####Fast Median
+_utime="$( TIMEFORMAT='%R';time ( java SequentialAnalyser ../../input/input1/ 2 > ../../output/seq_fastmedian_input1.txt) 2>&1 1>/dev/null )"
+echo sequential,input1,fastmedian,$_utime >> ../../runtimes.csv
+echo Completed sequential program for mean, median and fast median with input1
+
+###Input 2
+####Mean
+_utime="$( TIMEFORMAT='%R';time ( java SequentialAnalyser ../../input/input2/ 0 > ../../output/seq_mean_input2.txt) 2>&1 1>/dev/null )"
+echo sequential,input2,mean,$_utime >> ../../runtimes.csv
+
+####Median
+_utime="$( TIMEFORMAT='%R';time ( java SequentialAnalyser ../../input/input2/ 1 > ../../output/seq_median_input2.txt) 2>&1 1>/dev/null )"
+echo sequential,input2,median,$_utime >> ../../runtimes.csv
+
+####Fast Median
+_utime="$( TIMEFORMAT='%R';time ( java SequentialAnalyser ../../input/input2/ 2 > ../../output/seq_fastmedian_input2.txt) 2>&1 1>/dev/null )"
+cd ../..
+echo sequential,input2,fastmedian,$_utime >> runtimes.csv
+echo Completed sequential program for mean, median and fast median with input2
+
+
+##Threaded programs
+cd src/threaded/
+javac ThreadedAnalyser.java
+### Input 1
+#### Mean
+_utime="$( TIMEFORMAT='%R';time ( java ThreadedAnalyser ../../input/input1/ 0 > ../../output/threaded_mean_input1.txt) 2>&1 1>/dev/null )"
+echo threaded,input1,mean,$_utime >> ../../runtimes.csv
+
+#### Median
+_utime="$( TIMEFORMAT='%R';time ( java ThreadedAnalyser ../../input/input1/ 1 > ../../output/threaded_median_input1.txt) 2>&1 1>/dev/null )"
+echo threaded,input1,median,$_utime >> ../../runtimes.csv
+
+#### Fast Median
+_utime="$( TIMEFORMAT='%R';time ( java ThreadedAnalyser ../../input/input1/ 2 > ../../output/threaded_fastmedian_input1.txt) 2>&1 1>/dev/null )"
+echo threaded,input1,fastmedian,$_utime >> ../../runtimes.csv
+echo Completed threaded program for mean, median and fast median with input1
+
+### Input 2
+#### Mean
+_utime="$( TIMEFORMAT='%R';time ( java ThreadedAnalyser ../../input/input2/ 0 > ../../output/threaded_mean_input2.txt) 2>&1 1>/dev/null )"
+echo threaded,input2,mean,$_utime >> ../../runtimes.csv
+
+#### Median
+_utime="$( TIMEFORMAT='%R';time ( java ThreadedAnalyser ../../input/input2/ 1 > ../../output/threaded_median_input2.txt) 2>&1 1>/dev/null )"
+echo threaded,input2,median,$_utime >> ../../runtimes.csv
+
+#### Fast Median
+_utime="$( TIMEFORMAT='%R';time ( java ThreadedAnalyser ../../input/input2/ 2 > ../../output/threaded_fastmedian_input2.txt ) 2>&1 1>/dev/null )"
+echo threaded,input2,fastmedian,$_utime >> ../../runtimes.csv
+cd ../../
+echo Completed threaded program for mean, median and fast median with input2
+
+
+#Pseudo Mode
+cd src/pseudo
+mr-jobhistory-daemon.sh stop historyserver
+stop-yarn.sh
+stop-dfs.sh
+start-dfs.sh
+start-yarn.sh
+mr-jobhistory-daemon.sh start historyserver
+hadoop fs -rmr /user/temp/output
+rm -rf output
+hadoop fs -mkdir -p /user/temp
+hadoop fs -mkdir -p /user/temp/input1
+hadoop fs -mkdir -p /user/temp/input2
+hadoop fs -put input/input1/* /user/temp/input1
+hadoop fs -put input/input2/* /user/temp/input2
+hadoop com.sun.tools.javac.Main Main.java
+jar cf main.jar Main*.class
+mkdir output
+
+### Input 1
+#### Mean
+start=`date +%s`
+rm -rf output
+hadoop jar main.jar Main /user/temp/input1 /user/temp/output 0 > temp.log
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+mkdir output
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../../output/pseudo_mean_input1.txt
+echo pseudo,input1,mean,$runtime >> ../../runtimes.csv
+
+#### Median
+hadoop fs -rmr /user/temp/output
+rm -rf output
+start=`date +%s`
+hadoop jar main.jar Main /user/temp/input1 /user/temp/output 1 > temp.log
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+mkdir output
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../../output/pseudo_median_input1.txt
+echo pseudo,input1,median,$runtime >> ../../runtimes.csv
+
+#### Fast Median
+hadoop fs -rmr /user/temp/output
+rm -rf output
+start=`date +%s`
+hadoop jar main.jar Main /user/temp/input1 /user/temp/output 2 > temp.log
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+mkdir output
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../../output/pseudo_fastmedian_input1.txt
+echo pseudo,input1,fastmedian,$runtime >> ../../runtimes.csv
+
+### Input 2
+#### Mean
+hadoop fs -rmr /user/temp/output
+rm -rf output
+start=`date +%s`
+hadoop jar main.jar Main /user/temp/input2 /user/temp/output 0 > temp.log
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+mkdir output
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../../output/pseudo_mean_input2.txt
+echo pseudo,input2,mean,$runtime >> ../../runtimes.csv
+
+#### Median
+hadoop fs -rmr /user/temp/output
+rm -rf output
+start=`date +%s`
+hadoop jar main.jar Main /user/temp/input2 /user/temp/output 1 > temp.log
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+mkdir output
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../../output/pseudo_median_input2.txt
+echo pseudo,input2,median,$runtime >> ../../runtimes.csv
+
+#### Fast Median
+hadoop fs -rmr /user/temp/output
+rm -rf output
+start=`date +%s`
+hadoop jar main.jar Main /user/temp/input2 /user/temp/output 2 > temp.log
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+mkdir output
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../../output/pseudo_fastmedian_input2.txt
+echo pseudo,input2,fastmedian,$runtime >> ../../runtimes.csv
+cd ../..
+
+## EMR - Hadoop
+cd src/emr
+hadoop com.sun.tools.javac.Main Main.java
+jar cf Main.jar Main*.class
+aws s3 mb s3://neel-assign2
+aws s3 cp Main.jar s3://neel-habiba/
+aws s3 cp all s3://neel-habiba/input --recursive
+mkdir output
+## Input1
+## Mean
+aws s3 rm s3://neel-habiba/output --recursive
+rm -rf output
+start=`date +%s`
+aws emr create-cluster --name "HW3_Cluster" --release-label emr-4.3.0 --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge --steps Type=CUSTOM_JAR,Name="Main program JAR",ActionOnFailure=CONTINUE,Jar=s3://neel-habiba/Main.jar,MainClass=Main,Args=[s3://neel-habiba/input1,s3://neel-habiba/output,0] --auto-terminate --log-uri s3://neel-habiba/logs --service-role EMR_DefaultRole --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,AvailabilityZone=us-east-1a --enable-debugging > ~/.aws/clusterID
+aws emr describe-cluster --cluster-id  $(cat ~/.aws/clusterID| jq -r .ClusterId)| jq -r .Cluster.Status.State
+echo 'Creating a cluster.. wait for the end message..';
+i=0
+while [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATED\""  &&  "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATING\"" ]]
+do
+  if [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" == "\"RUNNING\"" && "$i" == "0" ]]; then
+    start=`date +%s`
+    i=1
+    echo $start $i
+  fi
+  echo -ne $(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq -r '.Cluster.Status.State');
+done
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+s3cmd get s3://neel-habiba/output/* output/
+Rscript R-plot.R output > ../../output/emr_mean_input1.txt
+echo emr,input1,mean,$runtime >> ../../runtimes.csv
+
+### Median
+aws s3 rm s3://neel-habiba/output --recursive
+rm -rf output
+mkdir output
+start=`date +%s`
+aws emr create-cluster --name "HW3_Cluster" --release-label emr-4.3.0 --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge --steps Type=CUSTOM_JAR,Name="Main program JAR",ActionOnFailure=CONTINUE,Jar=s3://neel-habiba/Main.jar,MainClass=Main,Args=[s3://neel-habiba/input1,s3://neel-habiba/output,1] --auto-terminate --log-uri s3://neel-habiba/logs --service-role EMR_DefaultRole --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,AvailabilityZone=us-east-1a --enable-debugging > ~/.aws/clusterID
+aws emr describe-cluster --cluster-id  $(cat ~/.aws/clusterID| jq -r .ClusterId)| jq -r .Cluster.Status.State
+echo 'Creating a cluster.. wait for the end message..';
+i=0
+while [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATED\""  &&  "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATING\"" ]]
+do
+  if [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" == "\"RUNNING\"" && "$i" == "0" ]]; then
+    start=`date +%s`
+    i=1
+    echo $start $i
+  fi
+  echo -ne $(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq -r '.Cluster.Status.State');
+done
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+s3cmd get s3://neel-habiba/output/* output/
+Rscript R-plot.R output > ../../output/emr_median_input1.txt
+echo emr,input1,median,$runtime >> ../../runtimes.csv
+
+#### FastMedian
+aws s3 rm s3://neel-habiba/output --recursive
+rm -rf output
+mkdir output
+start=`date +%s`
+aws emr create-cluster --name "HW3_Cluster" --release-label emr-4.3.0 --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge --steps Type=CUSTOM_JAR,Name="Main program JAR",ActionOnFailure=CONTINUE,Jar=s3://neel-habiba/Main.jar,MainClass=Main,Args=[s3://neel-habiba/input1,s3://neel-habiba/output,2] --auto-terminate --log-uri s3://neel-habiba/logs --service-role EMR_DefaultRole --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,AvailabilityZone=us-east-1a --enable-debugging > ~/.aws/clusterID
+aws emr describe-cluster --cluster-id  $(cat ~/.aws/clusterID| jq -r .ClusterId)| jq -r .Cluster.Status.State
+echo 'Creating a cluster.. wait for the end message..';
+i=0
+while [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATED\""  &&  "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATING\"" ]]
+do
+  if [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" == "\"RUNNING\"" && "$i" == "0" ]]; then
+    start=`date +%s`
+    i=1
+    echo $start $i
+  fi
+  echo -ne $(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq -r '.Cluster.Status.State');
+done
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+s3cmd get s3://neel-habiba/output/* output/
+Rscript R-plot.R output > ../../output/emr_fastmedian_input1.txt
+echo emr,input1,fastmedian,$runtime >> ../../runtimes.csv
+
+### Input2
+### Mean
+aws s3 rm s3://neel-habiba/output --recursive
+rm -rf output
+mkdir output
+start=`date +%s`
+aws emr create-cluster --name "HW3_Cluster" --release-label emr-4.3.0 --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge --steps Type=CUSTOM_JAR,Name="Main program JAR",ActionOnFailure=CONTINUE,Jar=s3://neel-habiba/Main.jar,MainClass=Main,Args=[s3://neel-habiba/input2,s3://neel-habiba/output,0] --auto-terminate --log-uri s3://neel-habiba/logs --service-role EMR_DefaultRole --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,AvailabilityZone=us-east-1a --enable-debugging > ~/.aws/clusterID
+aws emr describe-cluster --cluster-id  $(cat ~/.aws/clusterID| jq -r .ClusterId)| jq -r .Cluster.Status.State
+echo 'Creating a cluster.. wait for the end message..';
+i=0
+while [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATED\""  &&  "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATING\"" ]]
+do
+  if [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" == "\"RUNNING\"" && "$i" == "0" ]]; then
+    start=`date +%s`
+    i=1
+    echo $start $i
+  fi
+  echo -ne $(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq -r '.Cluster.Status.State');
+done
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+s3cmd get s3://neel-habiba/output/* output/
+Rscript R-plot.R output > ../../output/emr_mean_input2.txt
+echo emr,input2,mean,$runtime >> ../../runtimes.csv
+
+### Median
+aws s3 rm s3://neel-habiba/output --recursive
+rm -rf output
+mkdir output
+start=`date +%s`
+aws emr create-cluster --name "HW3_Cluster" --release-label emr-4.3.0 --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge --steps Type=CUSTOM_JAR,Name="Main program JAR",ActionOnFailure=CONTINUE,Jar=s3://neel-habiba/Main.jar,MainClass=Main,Args=[s3://neel-habiba/input2,s3://neel-habiba/output,1] --auto-terminate --log-uri s3://neel-habiba/logs --service-role EMR_DefaultRole --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,AvailabilityZone=us-east-1a --enable-debugging > ~/.aws/clusterID
+aws emr describe-cluster --cluster-id  $(cat ~/.aws/clusterID| jq -r .ClusterId)| jq -r .Cluster.Status.State
+echo 'Creating a cluster.. wait for the end message..';
+i=0
+while [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATED\""  &&  "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATING\"" ]]
+do
+  if [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" == "\"RUNNING\"" && "$i" == "0" ]]; then
+    start=`date +%s`
+    i=1
+    echo $start $i
+  fi
+  echo -ne $(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq -r '.Cluster.Status.State');
+done
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+s3cmd get s3://neel-habiba/output/* output/
+Rscript R-plot.R output > ../../output/emr_median_input2.txt
+echo emr,input2,median,$runtime >> ../../runtimes.csv
+
+#### FastMedian
+aws s3 rm s3://neel-habiba/output --recursive
+rm -rf output
+mkdir output
+start=`date +%s`
+aws emr create-cluster --name "HW3_Cluster" --release-label emr-4.3.0 --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge --steps Type=CUSTOM_JAR,Name="Main program JAR",ActionOnFailure=CONTINUE,Jar=s3://neel-habiba/Main.jar,MainClass=Main,Args=[s3://neel-habiba/input2,s3://neel-habiba/output,2] --auto-terminate --log-uri s3://neel-habiba/logs --service-role EMR_DefaultRole --ec2-attributes InstanceProfile=EMR_EC2_DefaultRole,AvailabilityZone=us-east-1a --enable-debugging > ~/.aws/clusterID
+aws emr describe-cluster --cluster-id  $(cat ~/.aws/clusterID| jq -r .ClusterId)| jq -r .Cluster.Status.State
+echo 'Creating a cluster.. wait for the end message..';
+i=0
+while [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATED\""  &&  "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" != "\"TERMINATING\"" ]]
+do
+  if [[ "$(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq '.Cluster.Status.State')" == "\"RUNNING\"" && "$i" == "0" ]]; then
+    start=`date +%s`
+    i=1
+    echo $start $i
+  fi
+  echo -ne $(aws emr describe-cluster --cluster-id $(cat ~/.aws/clusterID| jq -r '.ClusterId') | jq -r '.Cluster.Status.State');
+done
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+s3cmd get s3://neel-habiba/output/* output/
+Rscript R-plot.R output > ../../output/emr_fastmedian_input2.txt
+echo emr,input2,fastmedian,$runtime >> ../../runtimes.csv
+
+cd ../..
+
+#### Scala Mode
+cd scala/
+make hstop
+make format
+make hstart
+make temp
+hadoop fs -put ../input/input1 /user/temp/input
+hadoop fs -put ../input/input2 /user/temp/input
+
+####Input 1
+#Mean
+hadoop fs -rmr /user/temp/output
+rm -rf output
+mkdir output
+start=`date +%s`
+make hadoop1
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../output/scala_mean_input1.txt
+echo scala,input1,mean,$runtime >> ../runtimes.csv
+
+#Median
+echo median
+hadoop fs -rmr /user/temp/output
+rm -rf output
+mkdir output
+start=`date +%s`
+make hadoop2
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../output/scala_median_input1.txt
+echo scala,input1,median,$runtime >> ../runtimes.csv
+
+
+echo median completed
+#FastMedian
+hadoop fs -rmr /user/temp/output
+rm -rf output
+mkdir output
+start=`date +%s`
+make hadoop3
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../output/scala_fastmedian_input1.txt
+echo scala,input1,fastmedian,$runtime >> ../runtimes.csv
+
+####Input 2
+#Mean
+hadoop fs -rmr /user/temp/output
+rm -rf output
+mkdir output
+start=`date +%s`
+make hadoop4
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../output/scala_mean_input2.txt
+echo scala,input2,mean,$runtime >> ../runtimes.csv
+
+#Median
+hadoop fs -rmr /user/temp/output
+rm -rf output
+mkdir output
+start=`date +%s`
+make hadoop5
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../output/scala_median_input2.txt
+echo scala,input2,median,$runtime >> ../runtimes.csv
+
+#FastMedian
+hadoop fs -rmr /user/temp/output
+rm -rf output
+mkdir output
+start=`date +%s`
+make hadoop6
+end=`date +%s`
+runtime=$((end-start))
+echo $runtime
+hadoop fs -get /user/temp/output output
+Rscript R-plot.R output/output> ../output/scala_fastmedian_input2.txt
+echo scala,input2,fastmedian,$runtime >> ../runtimes.csv
+
+cd ..
+########## Plot a Graph #########
+Rscript -e "library(rmarkdown); rmarkdown::render('Report.Rmd')" "runtimes.csv"
+wkhtmltopdf Report.html Report.pdf
+
+

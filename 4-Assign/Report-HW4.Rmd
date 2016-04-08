@@ -1,0 +1,113 @@
+---
+title: "Linear Regression - Assignment 4 Report"
+author: "Neelesh and Habiba"
+output: html_document
+---
+
+
+### Implementation details for the MapReduce:
+
+### Shell script
+We created a shell script which invokes calls to
+1. Hadoop program for MapReduce in EMR mode
+2. EMR commandline call to create a cluster and run the step.
+
+#### Inputs
+Input - The .gz files provided in the all folder are placed in input folder
+
+#### Output from shell script
+Output files from the programs will be written as below to output/
+```{r, eval=FALSE}
+    Report.pdf
+    ...
+```
+
+### Running the shell script
+#### Prerequisites
+Input files should be placed in input
+
+```{r, eval=FALSE}
+# Execute the script in the following way
+make Regression
+```
+
+#### Implementation Details of Linear Regression
+```{r, eval=FALSE}
+1. Using mapReduce, found out the sane records from all the files.
+2. Sent the sane records from 2010-2014 as output with Carrier as Key and Distance, CRS_Elapsed_Time and AVG_Price as Value.
+3. Using the output from MapReduce we make linear models for all the 13 Carriers.
+4. We plot 2 graphs for each Carrier one using Avg_Price to Distance and other using Avg_Price to CRS_Elapsed_Time i.e. 26 graphs in total
+5. We found that the Distance has better slope than Time for all the carriers and the r-squared error is less for Distance. So Distance is a better variable.
+
+```
+
+###Conclusion
+F9 is the cheapest airline. For every airline, we found the avg price at regular interval and added them. F9 has the least summation value.
+Distance is a better variable as the Slope of Distance is more than Time for all the Carriers and the summation of r-squared error is less for distance as compared to time.
+
+  
+### Results - Plot
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
+library(ggplot2)
+library(caret)
+args<-commandArgs(trailingOnly = TRUE)
+foldername <- args[1]
+#setwd(foldername)
+files<-list.files(path="/Users/ummehabibashaik/Documents/Mapreduce/HW4/src/pseudo/output",pattern="part-r-",full.names = TRUE)
+  #dir("/Users/ummehabibashaik/Documents/Mapreduce/HW4/src/pseudo/output/", pattern='part-r-', full.names = TRUE)
+newData<-c()
+for(i in 1:length(files)){
+  newData <- rbind(newData,read.table(file=files[i], header=FALSE, sep="\t"))
+}
+
+#Loading Data
+colnames(newData) <- c("AIRLINE","AVG_TICKET_PRICE","DISTANCE","CRS_ELAPSED_TIME")
+
+#Data cleansing - removing null values
+CleansedData <- na.omit(newData)
+CleansedData$CRS_ELAPSED_TIME <- as.integer(CleansedData$CRS_ELAPSED_TIME)
+summary(CleansedData)
+
+uniqueList<-unique(CleansedData[c('AIRLINE')])
+
+```
+
+Following graph shows time taken for each configuration to run with different input sizes:
+
+```{r, echo=FALSE}
+# Display plot in the report --------------------------------
+
+# Plot average ticket price for each month for each airline
+
+# NOTE: 
+# scale_shape_manual is required because ggplot will automatically assign only
+# 6 shapes to 6 different Carriers. We have more than 6 carriers, which requires 
+# manual setting.    
+airline_prices <- data.frame(AIRLINE=character(),PRICE=integer(),stringsAsFactors=FALSE) 
+for (airline in uniqueList$AIRLINE){
+  #airline<-'F9'
+  filteredData <- CleansedData[CleansedData$AIRLINE == airline,]
+  
+  #Model1: Training Linear model with Distance
+  plot.x <- qplot(y=AVG_TICKET_PRICE, x=DISTANCE, data=filteredData)
+  model.x <- lm(AVG_TICKET_PRICE ~ DISTANCE, filteredData)
+  prices <- predict(model.x,data.frame(DISTANCE=(c(100,500,1000))),interval="prediction")
+  airline_prices <- rbind(airline_prices,data.frame("AIRLINE"=airline, "PRICE"=sum(prices[,"fit"])))
+  coef(model.x)
+  print(plot.x + geom_abline(intercept=coef(model.x)[1],slope=coef(model.x)[2],col='red')+ xlab("Distance")+ ylab("Ticket Price"))
+  #ggsave(filename = paste(airline,"_dist",".png",sep=""),plot=plt)
+  
+  #Model2 Training Linear model with CRS_ELAPSED_TIME
+  plot.x2 <- qplot(y=AVG_TICKET_PRICE, x=CRS_ELAPSED_TIME, data=filteredData)
+  model.x2 <- lm(AVG_TICKET_PRICE ~ CRS_ELAPSED_TIME, filteredData)
+  coef(model.x2)
+  print(plot.x2 + geom_abline(intercept=coef(model.x2)[1],slope=coef(model.x2)[2],col='red')+ xlab("CRS_ELAPSED_TIME")+ ylab("AVG_TICKET_PRICE"))
+  #ggsave(filename = paste(airline,"_time",".png",sep=""),plot=plt2)
+  
+}
+
+sortedList<-airline_prices[order(airline_prices$PRICE,decreasing=FALSE),]
+cheapAirline <- head(sortedList[1],1)
+print(cheapAirline,row.names=FALSE)
+```

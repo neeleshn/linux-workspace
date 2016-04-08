@@ -1,0 +1,17 @@
+[0m[[0minfo[0m] [0mPackaging /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/demo_2.10-1.0.jar ...[0m
+[0m[[0mdebug[0m] [0mInput file mappings:[0m
+[0m[[0mdebug[0m] [0m	main/Demo$.class[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main/Demo$.class[0m
+[0m[[0mdebug[0m] [0m	main/Demo.class[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main/Demo.class[0m
+[0m[[0mdebug[0m] [0m	main/DemoMapper.class[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main/DemoMapper.class[0m
+[0m[[0mdebug[0m] [0m	main/MedianReducer.class[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main/MedianReducer.class[0m
+[0m[[0mdebug[0m] [0m	main/FastReducer.class[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main/FastReducer.class[0m
+[0m[[0mdebug[0m] [0m	main[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main[0m
+[0m[[0mdebug[0m] [0m	main/MeanReducer.class[0m
+[0m[[0mdebug[0m] [0m	  /home/neeleshganan/Dropbox/myGit/linux-workspace/3-Assign/src/3-Assign/target/scala-2.10/classes/main/MeanReducer.class[0m
+[0m[[0minfo[0m] [0mDone packaging.[0m

@@ -1,0 +1,16 @@
+import AssemblyKeys._
+
+lazy val root = (project in file(".")).
+  settings(
+    name := "Main",
+    version := "1.0",
+    mainClass in Compile := Some("Main")
+  )
+
+libraryDependencies += "nz.ac.waikato.cms.weka" % "weka-stable" % "3.6.6"
+
+// Hadoop
+libraryDependencies += "org.apache.hadoop" % "hadoop-common" % "2.6.3"
+libraryDependencies += "org.apache.hadoop" % "hadoop-mapreduce" % "2.6.3"
+libraryDependencies += "org.apache.hadoop" % "hadoop-mapreduce-client-common" % "2.6.3"
+

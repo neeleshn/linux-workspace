@@ -1,0 +1,7 @@
+pseudo:
+		cd History && (Make) pseudo
+		cd Test && (Make) pseudo
+		cd Evaluation && (Make) run
+
+emr:
+		
